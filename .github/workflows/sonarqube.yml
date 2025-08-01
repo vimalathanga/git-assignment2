@@ -11,16 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Step 1: Checkout repository code
-      - uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      # Step 2: Set up JDK 17 (Required by SonarCloud)
+      # Step 2: Set up JDK 17 (Required for SonarCloud)
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      # Step 3: Install Sonar Scanner CLI manually
+      # Step 3: Install Sonar Scanner CLI and update PATH
       - name: Install Sonar Scanner
         run: |
           sudo apt-get update
@@ -28,13 +29,14 @@ jobs:
           wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
           unzip sonar-scanner-cli-4.8.0.2856-linux.zip
           sudo mv sonar-scanner-4.8.0.2856-linux /opt/sonar-scanner
+          # Make sonar-scanner available in PATH for later steps
           echo "/opt/sonar-scanner/bin" >> $GITHUB_PATH
 
-      # Step 4: Run SonarQube Analysis (Force Java 17)
+      # Step 4: Run SonarQube Analysis (Force Java 17 + Correct PATH)
       - name: Run SonarQube Analysis
         env:
           JAVA_HOME: /usr/lib/jvm/temurin-17-jdk-amd64
-          PATH: /usr/lib/jvm/temurin-17-jdk-amd64/bin:$PATH
+          PATH: /usr/lib/jvm/temurin-17-jdk-amd64/bin:/opt/sonar-scanner/bin:$PATH
         run: |
           sonar-scanner \
             -Dsonar.projectKey=vimalathanga_git-assignment2 \
